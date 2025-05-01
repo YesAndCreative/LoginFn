@@ -3,7 +3,7 @@ import useSWRMutation from "swr/mutation";
 import axios from "axios";
 
 // axios 쿠키 설정 강제화
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 // axios 전용 인스턴스 생성
 const api = axios.create({
@@ -16,16 +16,16 @@ const api = axios.create({
 });
 
 // axios 요청 인터셉터 추가
-api.interceptors.request.use(
-  (config) => {
-    console.log("요청 전송 중:", config.url);
-    console.log("현재 쿠키:", document.cookie);
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// api.interceptors.request.use(
+//   (config) => {
+//     console.log("요청 전송 중:", config.url);
+//     console.log("현재 쿠키:", document.cookie);
+//     return config;
+//   },
+//   (error) => {
+//     return Promise.reject(error);
+//   }
+// );
 
 const postSignup = async (url: string, { arg }: { arg: SignupData }) => {
   const response = await api.post(url, arg);
@@ -37,13 +37,8 @@ const requestEmailVerification = async (
   { arg }: { arg: { email: string } }
 ) => {
   try {
-    console.log("이메일 인증 요청 시작...");
+    // axios 인스턴스에 이미 withCredentials: true가 설정되어 있어 쿠키가 자동으로 전송됨
     const response = await api.post(url, arg);
-    console.log("이메일 인증 응답:", response);
-
-    // 응답에서 쿠키 확인
-    console.log("응답 후 쿠키:", document.cookie);
-
     return response.data;
   } catch (error) {
     console.error("이메일 인증 요청 오류:", error);
@@ -53,38 +48,8 @@ const requestEmailVerification = async (
 
 const verifyEmailCode = async (url: string, { arg }: { arg: string }) => {
   try {
-    console.log("인증 코드 검증 요청 시작...");
-    console.log("검증 요청 전 쿠키:", document.cookie);
-
-    // 검증 요청 시 수동으로 쿠키 확인 및 헤더 설정
-    const cookies = document.cookie.split("; ");
-    const sessionCookie = cookies.find((row) => row.startsWith(".AspNetCore.Session="));
-    const setCookie = cookies.find((row) => row.startsWith("set-cookie="));
-
-    console.log("세션 쿠키 찾음:", sessionCookie);
-    console.log("set-cookie 찾음:", setCookie);
-
-    // 요청 헤더 설정
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json"
-    };
-
-    // set-cookie 값이 있으면 헤더에 추가
-    if (setCookie) {
-      const cookieValue = setCookie.split("=")[1];
-      headers["Cookie"] = `set-cookie=${cookieValue}`;
-    }
-
-    const response = await api.post(
-      url,
-      { code: arg },
-      {
-        withCredentials: true,
-        headers: headers
-      }
-    );
-
-    console.log("검증 응답:", response);
+    // axios 인스턴스에 이미 withCredentials: true가 설정되어 있어 쿠키가 자동으로 전송됨
+    const response = await api.post(url, { code: arg });
     return response.data;
   } catch (error) {
     console.error("인증 코드 검증 오류:", error);
@@ -116,6 +81,10 @@ const Signup = () => {
     verifyEmailCode
   );
 
+
+  // const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [data, setData] = useState<SignupData>({
     name: "",
     email: "",
@@ -123,18 +92,10 @@ const Signup = () => {
     password: "",
     birth: "",
   });
-  // const [showVerification, setShowVerification] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   // Countdown timer state
   const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
   const [timerActive, setTimerActive] = useState(false);
-
-  // 컴포넌트 마운트 시 쿠키 확인
-  useEffect(() => {
-    console.log("컴포넌트 마운트 시 쿠키:", document.cookie);
-  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -177,14 +138,9 @@ const Signup = () => {
     }
 
     try {
-      console.log("인증 요청 전 쿠키:", document.cookie);
-
       // Call email verification API
       await triggerEmailVerification({ email: data.email });
 
-      console.log("인증 요청 후 쿠키:", document.cookie);
-
-      // Show verification code input and start timer
       // setShowVerification(true);
       setTimeRemaining(5 * 60); // Reset to 5 minutes
       setTimerActive(true);
@@ -202,10 +158,6 @@ const Signup = () => {
     }
 
     try {
-      // Check if cookie exists
-      console.log("검증 요청 직전 쿠키 확인:", document.cookie);
-
-      // Call verification code API with only the code
       await triggerVerifyCode(verificationCode);
 
       // If successful
