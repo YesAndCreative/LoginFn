@@ -2,12 +2,9 @@ import { useState, useEffect } from "react";
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
 
-// axios 쿠키 설정 강제화
-// axios.defaults.withCredentials = true;
-
-// axios 전용 인스턴스 생성
+// Axios Instance
 const api = axios.create({
-  baseURL: "http://172.30.1.9:5133",
+  baseURL: "http://172.30.1.6:5133",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -15,18 +12,8 @@ const api = axios.create({
   },
 });
 
-// axios 요청 인터셉터 추가
-// api.interceptors.request.use(
-//   (config) => {
-//     console.log("요청 전송 중:", config.url);
-//     console.log("현재 쿠키:", document.cookie);
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
 
+// ================ API Request Handler START ================
 const postSignup = async (url: string, { arg }: { arg: SignupData }) => {
   const response = await api.post(url, arg);
   return response.data;
@@ -37,7 +24,6 @@ const requestEmailVerification = async (
   { arg }: { arg: { email: string } }
 ) => {
   try {
-    // axios 인스턴스에 이미 withCredentials: true가 설정되어 있어 쿠키가 자동으로 전송됨
     const response = await api.post(url, arg);
     return response.data;
   } catch (error) {
@@ -46,16 +32,17 @@ const requestEmailVerification = async (
   }
 };
 
-const verifyEmailCode = async (url: string, { arg }: { arg: string }) => {
+const verifyEmailCode = async (url: string, { arg }: { arg: { code: string, authKey: string } }) => {
   try {
-    // axios 인스턴스에 이미 withCredentials: true가 설정되어 있어 쿠키가 자동으로 전송됨
-    const response = await api.post(url, { code: arg });
+    const response = await api.post(url, arg);
     return response.data;
   } catch (error) {
     console.error("인증 코드 검증 오류:", error);
     throw error;
   }
 };
+// ================ API Request Handler END ================
+
 
 interface SignupData {
   name: string;
@@ -66,6 +53,7 @@ interface SignupData {
 }
 
 const Signup = () => {
+  // ================ SWR Mutation START ================
   const { trigger: triggerSignup } = useSWRMutation(
     "/api/user/register",
     postSignup
@@ -80,11 +68,13 @@ const Signup = () => {
     "/api/user/register/verifyEmail",
     verifyEmailCode
   );
+  // ================ SWR Mutation END ================
 
 
-  // const [showVerification, setShowVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [authKey, setAuthKey] = useState(""); 
+  const [showVerification, setShowVerification] = useState(false);
   const [data, setData] = useState<SignupData>({
     name: "",
     email: "",
@@ -94,7 +84,7 @@ const Signup = () => {
   });
 
   // Countdown timer state
-  const [timeRemaining, setTimeRemaining] = useState(5 * 60); // 5 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(5 * 60); 
   const [timerActive, setTimerActive] = useState(false);
 
   // Timer effect
@@ -138,10 +128,16 @@ const Signup = () => {
     }
 
     try {
-      // Call email verification API
-      await triggerEmailVerification({ email: data.email });
+      const result = await triggerEmailVerification({ email: data.email });
+      
+      // authKey는 result.data 안에 있음
+      if (result && result.data && result.data.authKey) {
+        const key = result.data.authKey;
+        setAuthKey(key);
+      }
 
-      // setShowVerification(true);
+      // Show verification UI and start timer
+      setShowVerification(true);
       setTimeRemaining(5 * 60); // Reset to 5 minutes
       setTimerActive(true);
       alert("인증 메일이 발송되었습니다. 이메일을 확인해주세요.");
@@ -156,17 +152,24 @@ const Signup = () => {
       alert("인증번호를 입력해주세요.");
       return;
     }
+    
+    if (!authKey) {
+      alert("인증키가 없습니다. 이메일 인증을 다시 요청해주세요.");
+      return;
+    }
 
     try {
-      await triggerVerifyCode(verificationCode);
+      const requestData = { code: verificationCode, authKey: authKey };
+    
+      await triggerVerifyCode(requestData);
 
-      // If successful
       setIsEmailVerified(true);
       setTimerActive(false);
       alert("이메일 인증이 완료되었습니다.");
+      
     } catch (error) {
-      console.error("인증번호 확인 실패:", error);
-      alert("인증번호가 일치하지 않거나 만료되었습니다.");
+      console.error("인증 코드 검증 실패:", error);
+      alert("인증번호가 올바르지 않습니다. 다시 확인해주세요.");
     }
   };
 
@@ -179,11 +182,9 @@ const Signup = () => {
     // }
 
     try {
-      const res = await triggerSignup(data);
-      console.log("등록 성공", res);
+    await triggerSignup(data);
       alert("회원가입이 완료되었습니다.");
-    } catch (error) {
-      console.error("회원가입 실패:", error);
+    } catch {
       alert("회원가입에 실패했습니다. 다시 시도해주세요.");
     }
   };
@@ -194,14 +195,14 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-400 to-indigo-600 px-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          회원가입(Sign Up)
+          회원가입
         </h1>
 
         <form className="space-y-4" onSubmit={submitData}>
           {/* 이름 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              이름 (Name)
+              이름
             </label>
             <input
               type="text"
@@ -216,7 +217,7 @@ const Signup = () => {
           {/* 이메일 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              이메일 (Email)
+              이메일
             </label>
             <div className="flex space-x-2">
               <input
@@ -242,7 +243,7 @@ const Signup = () => {
             </div>
 
             {/* 인증 코드 입력 영역 - 인증하기 버튼 클릭 시 표시 */}
-            {
+            {showVerification && (
               <div className="mt-2">
                 <div className="flex space-x-2 items-center">
                   <input
@@ -273,13 +274,13 @@ const Signup = () => {
                   </span>
                 </div>
               </div>
-            }
+            )}
           </div>
 
           {/* 전화번호 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              전화번호 (Phone Number)
+              전화번호
             </label>
             <input
               type="tel"
@@ -294,7 +295,7 @@ const Signup = () => {
           {/* 비밀번호 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              비밀번호 (Password)
+              비밀번호
             </label>
             <input
               type="password"
@@ -309,7 +310,7 @@ const Signup = () => {
           {/* 생년월일 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              생년월일 (Birthdate)
+              생년월일
             </label>
             <input
               type="date"
