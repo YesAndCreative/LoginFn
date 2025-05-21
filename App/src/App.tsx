@@ -1,9 +1,16 @@
-import Signup from "./pages/Signup";
+import { BrowserRouter } from "react-router-dom";
+import Header from "../components/Header";
+import AppRoutes from "./routes";
 
-export default function App() {
+function App() {
   return (
-    <>
-      <Signup />
-    </>
+    <BrowserRouter>
+      <Header />
+      <main>
+        <AppRoutes />
+      </main>
+    </BrowserRouter>
   );
 }
+
+export default App;
