@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useSWRMutation from "swr/mutation";
 import axios from "axios";
-import Wrapper from "../../components/Wrapper";
+import Wrapper from "@/components/Wrapper";
 
 const Signup = () => {
   return (
