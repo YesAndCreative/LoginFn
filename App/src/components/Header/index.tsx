@@ -6,8 +6,13 @@ const Header = () => {
   return (
     <header className="bg-gray-800 text-white p-4 h-[60px]">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold">
-          Home
+        <Link to="/" className="w-[100px] ">
+          <img
+            src="../../public/Logo/MainLogo.webp"
+            alt="Main Logo"
+            className="ob
+          "
+          />
         </Link>
         <nav>
           <ul className="flex space-x-4">

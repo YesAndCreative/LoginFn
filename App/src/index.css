@@ -9,8 +9,6 @@
   font-style: normal;
 }
 
-body {
-}
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

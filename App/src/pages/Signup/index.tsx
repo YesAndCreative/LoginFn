@@ -24,25 +24,41 @@ const formSchema = z.object({
     .max(50, { message: "Username must be less than 50 characters." }),
 });
 
-const form = useForm<z.infer<typeof formSchema>>({
-  resolver: zodResolver(formSchema),
-  defaultValues: {
-    username: "",
-  },
-});
-
-const onSubmit = (values: z.infer<typeof formSchema>) => {
-  console.log(values);
-};
-
 const Signup = () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log(values);
+  };
+
   return (
     <Wrapper>
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-          <h1 className="text-2xl font-bold text-center mb-6">회원가입</h1>
-        </div>
-      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="shadcn" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
     </Wrapper>
   );
 };
