@@ -5,10 +5,12 @@ import AppRoutes from "./routes";
 function App() {
   return (
     <BrowserRouter>
-      <Header />
-      <main>
-        <AppRoutes />
-      </main>
+      <div className="flex flex-col h-svh">
+        <Header />
+        <main className="flex-1">
+          <AppRoutes />
+        </main>
+      </div>
     </BrowserRouter>
   );
 }

@@ -37,29 +37,53 @@ const Signup = () => {
   };
 
   return (
-    <Wrapper>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="shadcn" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
-    </Wrapper>
+    <section className="flex w-full h-full">
+      <div className="flex-1 bg-[#000000] p-[40px] flex  items-center justify-center text-step-7">
+        <div className="flex flex-col items-start">
+          <span className="text-[#FFFFFF]">Yes, </span>
+          <span
+            style={{
+              WebkitTextStrokeWidth: "1px",
+              WebkitTextStrokeColor: "#FFFFFF",
+            }}
+          >
+            We create
+          </span>
+          <span
+            style={{
+              WebkitTextStrokeWidth: "1px",
+              WebkitTextStrokeColor: "#FFFFFF",
+            }}
+          >
+            Something
+          </span>
+          <span className="text-[#FFFFFF]">Creative.</span>
+        </div>
+      </div>
+      <main className="flex-1">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This is your public display name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
+      </main>
+    </section>
   );
 };
 
