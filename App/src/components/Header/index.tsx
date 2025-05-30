@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { buttonVariants } from "@/components/ui/button";
+import { LoginModal } from "@/components/LoginModal";
 
 const Header = () => {
   return (
@@ -10,18 +10,13 @@ const Header = () => {
           <img
             src="../../public/Logo/MainLogo.webp"
             alt="Main Logo"
-            className="ob
-          "
+            className="object-contain w-full h-auto"
           />
         </Link>
         <nav>
           <ul className="flex space-x-4">
             <li>
-              <Button asChild>
-                <Link to="/login">
-                  <span className="text-white">Login</span>
-                </Link>
-              </Button>
+              <LoginModal />
             </li>
             <li>
               <Button asChild>
