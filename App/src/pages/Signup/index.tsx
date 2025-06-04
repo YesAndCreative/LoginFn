@@ -1,6 +1,7 @@
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+
+import { signupFormSchema, type SignupFormData } from "@/lib/signup/validation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,30 +14,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const formSchema = z.object({
-  username: z
-    .string()
-    .min(2, { message: "Username must be at least 2 characters." })
-    .max(50, { message: "Username must be less than 50 characters." }),
-  email: z.string().email({ message: "Invalid email address" }),
-  tel: z
-    .string()
-    .regex(/^01[016789]-?\d{3,4}-?\d{4}$/, {
-      message: "Please enter a valid phone number (e.g., 010-1234-5678)",
-    })
-    .min(10, { message: "Phone number must be at least 10 digits." })
-    .max(13, { message: "Phone number must be less than 13 digits." }),
-  birth: z.string().refine((date) => !isNaN(Date.parse(date)), {
-    message: "Please enter a valid date of birth",
-  }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters." }),
-});
+import { useSignup } from "@/hooks/signup/useSignup";
 
 const Signup = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { handleSignup, isSigningUp } = useSignup();
+
+  const form = useForm<SignupFormData>({
+    resolver: zodResolver(signupFormSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -46,7 +30,7 @@ const Signup = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: SignupFormData) => {
     console.log(values);
   };
 
