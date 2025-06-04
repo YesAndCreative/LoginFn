@@ -1,7 +1,8 @@
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -11,32 +12,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 
-const formSchema = z.object({
-  username: z
-    .string()
-    .min(2, { message: "Username must be at least 2 characters." })
-    .max(50, { message: "Username must be less than 50 characters." }),
-  email: z.string().email({ message: "Invalid email address" }),
-  tel: z
-    .string()
-    .regex(/^01[016789]-?\d{3,4}-?\d{4}$/, {
-      message: "Please enter a valid phone number (e.g., 010-1234-5678)",
-    })
-    .min(10, { message: "Phone number must be at least 10 digits." })
-    .max(13, { message: "Phone number must be less than 13 digits." }),
-  birth: z.string().refine((date) => !isNaN(Date.parse(date)), {
-    message: "Please enter a valid date of birth",
-  }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters." }),
-});
+import { EmailVerification } from "@/components/auth/EmailVerification";
+import { useSignup } from "@/hooks/signup/useSignup";
+import { signupFormSchema, type SignupFormData } from "@/utils/validation";
+import type { SignupData } from "@/types/auth";
 
 const Signup = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { handleSignup, isSigningUp } = useSignup();
+
+  const form = useForm<SignupFormData>({
+    resolver: zodResolver(signupFormSchema),
     defaultValues: {
       username: "",
       email: "",
@@ -46,16 +32,27 @@ const Signup = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: SignupFormData) => {
+    // if (!isEmailVerified) {
+    //   alert("이메일 인증이 필요합니다.");
+    //   return;
+    // }
+
+    // Transform form data to API format
+    const signupData: SignupData = {
+      name: values.username,
+      email: values.email,
+      phoneNumber: values.tel,
+      password: values.password,
+      birth: values.birth,
+    };
+
+    await handleSignup(signupData);
   };
 
-  const handleEmailVerification = () => {
-    const email = form.getValues("email");
-    if (email) {
-      console.log("이메일 인증 요청:", email);
-      // 여기에 이메일 인증 로직을 추가할 수 있습니다
-    }
+  const handleEmailVerificationComplete = () => {
+    // setIsEmailVerified(true);
+    console.log("이메일 인증이 완료되었습니다.");
   };
 
   return (
@@ -106,7 +103,7 @@ const Signup = () => {
               )}
             />
 
-            {/* Email */}
+            {/* Email with Verification */}
             <FormField
               control={form.control}
               name="email"
@@ -114,21 +111,10 @@ const Signup = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="example@email.com"
-                        {...field}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleEmailVerification}
-                        className="whitespace-nowrap"
-                      >
-                        Verify
-                      </Button>
-                    </div>
+                    <EmailVerification
+                      email={field.value}
+                      onVerificationComplete={handleEmailVerificationComplete}
+                    />
                   </FormControl>
                   <FormDescription>
                     Type your email address here.
@@ -190,7 +176,9 @@ const Signup = () => {
               )}
             />
 
-            <Button type="submit">Submit</Button>
+            <Button type="submit" disabled={isSigningUp} className="w-full">
+              {isSigningUp ? "회원가입 중..." : "Submit"}
+            </Button>
           </form>
         </Form>
       </main>
