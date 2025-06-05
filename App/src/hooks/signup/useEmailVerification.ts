@@ -1,6 +1,8 @@
 import { useState } from "react";
-import useSWRMutation from "swr/mutation";
-import { requestEmailVerification, verifyEmailCode } from "@/lib/api/auth.api";
+import {
+  useEmailVerificationMutation,
+  useVerifyCodeMutation,
+} from "@/lib/mutations/auth.mutations";
 import type { VerifyCodeRequest } from "@/types/auth";
 
 export const useEmailVerification = () => {
@@ -13,10 +15,10 @@ export const useEmailVerification = () => {
   const {
     trigger: triggerEmailVerification,
     isMutating: isRequestingVerification,
-  } = useSWRMutation("/api/user/register/checkEmail", requestEmailVerification);
+  } = useEmailVerificationMutation();
 
   const { trigger: triggerVerifyCode, isMutating: isVerifyingCode } =
-    useSWRMutation("/api/user/register/verifyEmail", verifyEmailCode);
+    useVerifyCodeMutation();
 
   // 이메일 인증 요청
   const handleRequestVerification = async (email: string) => {

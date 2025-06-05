@@ -1,9 +1,7 @@
 import api from "./client";
 import type {
   SignupData,
-  EmailVerificationRequest,
   EmailVerificationResponse,
-  VerifyCodeRequest,
   ApiResponse,
 } from "@/types/auth";
 
@@ -16,7 +14,7 @@ export const postSignup = async (url: string, { arg }: { arg: SignupData }) => {
 // 이메일 인증 요청 API
 export const requestEmailVerification = async (
   url: string,
-  { arg }: { arg: EmailVerificationRequest }
+  { arg }: { arg: { email: string } }
 ) => {
   try {
     const response = await api.post<EmailVerificationResponse>(url, arg);
@@ -30,7 +28,7 @@ export const requestEmailVerification = async (
 // 이메일 인증 코드 검증 API
 export const verifyEmailCode = async (
   url: string,
-  { arg }: { arg: VerifyCodeRequest }
+  { arg }: { arg: { code: string; authKey: string } }
 ) => {
   try {
     const response = await api.post<ApiResponse<{ verified: boolean }>>(

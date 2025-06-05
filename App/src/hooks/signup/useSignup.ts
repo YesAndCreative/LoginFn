@@ -1,5 +1,4 @@
-import useSWRMutation from "swr/mutation";
-import { postSignup } from "@/lib/api/auth.api";
+import { useSignupMutation } from "@/lib/mutations/auth.mutations";
 import type { SignupData } from "@/types/auth";
 
 export const useSignup = () => {
@@ -7,7 +6,7 @@ export const useSignup = () => {
     trigger: triggerSignup,
     isMutating: isSigningUp,
     error: signupError,
-  } = useSWRMutation("/api/user/register", postSignup);
+  } = useSignupMutation();
 
   // 회원가입 실행
   const handleSignup = async (data: SignupData) => {
