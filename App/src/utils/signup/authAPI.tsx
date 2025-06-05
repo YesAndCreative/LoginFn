@@ -1,11 +1,11 @@
-import api from "./client";
+import api from "@/lib/axios";
 import type {
   SignupData,
   EmailVerificationRequest,
   EmailVerificationResponse,
   VerifyCodeRequest,
   ApiResponse,
-} from "@/types/auth";
+} from "@/types/signup/auth";
 
 // 회원가입 API
 export const postSignup = async (url: string, { arg }: { arg: SignupData }) => {
