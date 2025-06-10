@@ -11,12 +11,24 @@ export const useSignup = () => {
   // 회원가입 실행
   const handleSignup = async (data: SignupData) => {
     try {
-      await triggerSignup(data);
-      alert("회원가입이 완료되었습니다.");
-      return true;
+      const result = await triggerSignup(data);
+
+      console.log("회원가입 결과:", result);
+
+      if (result.success) {
+        alert("회원가입이 완료되었습니다.");
+        console.log("회원가입 성공:", result.data);
+        return true;
+      } else {
+        console.error("서버 응답 실패:", result.message);
+        alert(
+          `회원가입에 실패했습니다: ${result.message || "알 수 없는 오류"}`
+        );
+        return false;
+      }
     } catch (error) {
-      console.error("회원가입 실패:", error);
-      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      console.error("회원가입 요청 오류:", error);
+      alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
       return false;
     }
   };

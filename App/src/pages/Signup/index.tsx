@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 
 import Loader from "@/components/common/Loader";
 import { signupFormSchema, type SignupFormData } from "@/lib/signup/validation";
+import CustomFormField from "@/components/common/CustomFormField";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSignup } from "@/hooks/signup/useSignup";
+import { ICustomFormField } from "@/types/signup/auth";
 
 const Signup = () => {
   const { handleSignup, isSigningUp, signupError } = useSignup();
@@ -32,11 +34,11 @@ const Signup = () => {
 
   const onSubmit = async (values: SignupFormData) => {
     const signupData = {
-      name: values.username,
       email: values.email,
+      password: values.password,
+      name: values.username,
       phoneNumber: values.tel,
       birth: values.birth,
-      password: values.password,
     };
 
     const success = await handleSignup(signupData);
@@ -56,6 +58,76 @@ const Signup = () => {
       // 여기에 이메일 인증 로직을 추가할 수 있습니다
     }
   };
+
+  const renderEmailField = ({
+    control,
+    name,
+    label,
+    description,
+  }: ICustomFormField) => (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <FormControl>
+            <div className="flex gap-2">
+              <Input
+                placeholder="example@email.com"
+                {...field}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleEmailVerification}
+                className="whitespace-nowrap"
+              >
+                Verify
+              </Button>
+            </div>
+          </FormControl>
+          <FormDescription>{description}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+
+  const formFieldConfig = [
+    {
+      name: "username",
+      label: "Username",
+      placeholder: "shadcn",
+      description: "This is your public display name.",
+    },
+    {
+      name: "tel",
+      label: "Phone Number",
+      placeholder: "010-1234-5678",
+      description: "Type your phone number here.",
+      type: "tel",
+    },
+    {
+      name: "email",
+      label: "Email",
+      description: "Type your email address here.",
+      renderCustomField: renderEmailField,
+    },
+    {
+      name: "birth",
+      label: "Date of Birth",
+      description: "Type your date of birth here.",
+      type: "date",
+    },
+    {
+      name: "password",
+      label: "Password",
+      description: "Type your password here.",
+      type: "password",
+    },
+  ];
 
   return (
     <>
@@ -90,107 +162,17 @@ const Signup = () => {
         <main className="flex-1 p-[100px]">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Name */}
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="shadcn" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="example@email.com"
-                          {...field}
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleEmailVerification}
-                          className="whitespace-nowrap"
-                        >
-                          Verify
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormDescription>
-                      Type your email address here.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Tel */}
-              <FormField
-                control={form.control}
-                name="tel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="010-1234-5678" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Type your phone number here.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Birth */}
-              <FormField
-                control={form.control}
-                name="birth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Type your date of birth here.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Password */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormDescription>Type your password here.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {formFieldConfig.map((item, index) => (
+                <CustomFormField
+                  key={index}
+                  control={form.control}
+                  name={item.name}
+                  label={item.label}
+                  placeholder={item.placeholder}
+                  description={item.description}
+                  renderCustomField={item.renderCustomField}
+                />
+              ))}
 
               <Button type="submit">Submit</Button>
             </form>

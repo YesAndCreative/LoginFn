@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface SignupData {
   name: string;
   email: string;
@@ -25,4 +27,14 @@ export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   success?: boolean;
+}
+
+export interface ICustomFormField {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control: any;
+  name: string;
+  label: string;
+  placeholder?: string;
+  description: string;
+  renderCustomField?: (props: ICustomFormField) => ReactNode;
 }
