@@ -15,11 +15,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useSignup } from "@/hooks/signup/useSignup";
 import { ICustomFormField } from "@/types/signup/auth";
+
+import useSignup from "@/hooks/signup/useSignup";
+import useEmailCheck from "@/hooks/signup/useEmailCheck";
 
 const Signup = () => {
   const { handleSignup, isSigningUp, signupError } = useSignup();
+  const { handleEmailCheck, isEmailChecking, emailCheckError } =
+    useEmailCheck();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupFormSchema),
@@ -51,11 +55,14 @@ const Signup = () => {
     }
   };
 
-  const handleEmailVerification = () => {
-    const email = form.getValues("email");
-    if (email) {
-      console.log("이메일 인증 요청:", email);
-      // 여기에 이메일 인증 로직을 추가할 수 있습니다
+  const onEmailCheck = async () => {
+    const isEmailValid = await form.trigger("email");
+    if (isEmailValid) {
+      const email = form.getValues("email");
+
+      const success = await handleEmailCheck({ email });
+
+      console.log("success :", success);
     }
   };
 
@@ -71,23 +78,23 @@ const Signup = () => {
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <div className="flex gap-2">
+          <div className="flex gap-2">
+            <FormControl>
               <Input
                 placeholder="example@email.com"
                 {...field}
                 className="flex-1"
               />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleEmailVerification}
-                className="whitespace-nowrap"
-              >
-                Verify
-              </Button>
-            </div>
-          </FormControl>
+            </FormControl>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onEmailCheck}
+              className="whitespace-nowrap"
+            >
+              Verify
+            </Button>
+          </div>
           <FormDescription>{description}</FormDescription>
           <FormMessage />
         </FormItem>
@@ -173,7 +180,6 @@ const Signup = () => {
                   renderCustomField={item.renderCustomField}
                 />
               ))}
-
               <Button type="submit">Submit</Button>
             </form>
           </Form>

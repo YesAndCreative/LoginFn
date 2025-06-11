@@ -1,8 +1,8 @@
 import api from "@/lib/axios";
 import type {
   SignupData,
-  EmailVerificationRequest,
-  EmailVerificationResponse,
+  EmailCheckRequest,
+  EmailCheckResponse,
   VerifyCodeRequest,
   ApiResponse,
 } from "@/types/signup/auth";
@@ -14,12 +14,12 @@ export const postSignup = async (url: string, { arg }: { arg: SignupData }) => {
 };
 
 // 이메일 인증 요청 API
-export const requestEmailVerification = async (
+export const requestEmailCheck = async (
   url: string,
-  { arg }: { arg: EmailVerificationRequest }
+  { arg }: { arg: EmailCheckRequest }
 ) => {
   try {
-    const response = await api.post<EmailVerificationResponse>(url, arg);
+    const response = await api.post<EmailCheckResponse>(url, arg);
     return response.data;
   } catch (error) {
     console.error("이메일 인증 요청 오류:", error);

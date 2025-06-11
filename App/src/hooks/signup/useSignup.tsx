@@ -13,8 +13,6 @@ export const useSignup = () => {
     try {
       const result = await triggerSignup(data);
 
-      console.log("회원가입 결과:", result);
-
       if (result.success) {
         alert("회원가입이 완료되었습니다.");
         console.log("회원가입 성공:", result.data);

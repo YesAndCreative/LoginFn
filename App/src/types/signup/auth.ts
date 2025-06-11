@@ -8,11 +8,11 @@ export interface SignupData {
   birth: string;
 }
 
-export interface EmailVerificationRequest {
+export interface EmailCheckRequest {
   email: string;
 }
 
-export interface EmailVerificationResponse {
+export interface EmailCheckResponse {
   data: {
     authKey: string;
   };

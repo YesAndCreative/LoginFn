@@ -1,7 +1,7 @@
 import useSWRMutation from "swr/mutation";
 import {
   postSignup,
-  requestEmailVerification,
+  requestEmailCheck,
   verifyEmailCode,
 } from "@/utils/signup/authAPI";
 
@@ -11,14 +11,11 @@ export const useSignupMutation = () => {
 };
 
 // 이메일 인증 요청 뮤테이션
-export const useEmailVerificationMutation = () => {
-  return useSWRMutation(
-    "api/user/register/checkEmail",
-    requestEmailVerification
-  );
+export const useEmailCheckMutation = () => {
+  return useSWRMutation("api/user/register/checkEmail", requestEmailCheck);
 };
 
 // 이메일 인증 코드 검증 뮤테이션
-export const useVerifyCodeMutation = () => {
+export const useVerificationMutation = () => {
   return useSWRMutation("api/user/register/verifyEmail", verifyEmailCode);
 };
