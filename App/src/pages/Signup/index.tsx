@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -5,6 +6,8 @@ import Loader from "@/components/common/Loader";
 import { signupFormSchema, type SignupFormData } from "@/lib/signup/validation";
 import CustomFormField from "@/components/common/CustomFormField";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ICustomFormField } from "@/types/signup/auth";
 import {
   Form,
   FormControl,
@@ -14,16 +17,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ICustomFormField } from "@/types/signup/auth";
 
 import useSignup from "@/hooks/signup/useSignup";
 import useEmailCheck from "@/hooks/signup/useEmailCheck";
+import useEmailVerify from "@/hooks/signup/useEmailVerify";
 
 const Signup = () => {
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(false);
+  const [emailAuthKey, setEmailAuthKey] = useState<string>("");
+  const [emailVerifyCode, setEmailVerifyCode] = useState<string>("");
+
   const { handleSignup, isSigningUp, signupError } = useSignup();
   const { handleEmailCheck, isEmailChecking, emailCheckError } =
     useEmailCheck();
+  const { handleEmailVerify, isEmailVerifying, emailVerifyError } =
+    useEmailVerify();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupFormSchema),
@@ -35,6 +43,36 @@ const Signup = () => {
       password: "",
     },
   });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "emailVerify") {
+      setEmailVerifyCode(value);
+    }
+  };
+
+  const onEmailCheck = async () => {
+    const isEmailValid = await form.trigger("email");
+    if (isEmailValid) {
+      const email = form.getValues("email");
+
+      const data = await handleEmailCheck({ email });
+
+      if (data) {
+        console.log("이메일 인증 요청을 발송했습니다");
+        setEmailAuthKey(data.data.authKey);
+      } else {
+        console.error("이메일 인증 요청 실패 :", emailCheckError);
+        alert("이메일 인증 요청에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
+
+  const onEmailVerify = async () => {
+    const data = await handleEmailVerify(emailVerifyCode, emailAuthKey);
+    console.log("data :", data);
+  };
 
   const onSubmit = async (values: SignupFormData) => {
     const signupData = {
@@ -52,17 +90,6 @@ const Signup = () => {
     } else {
       console.error("회원가입 실패:", signupError);
       alert("회원가입에 실패했습니다. 다시 시도해주세요.");
-    }
-  };
-
-  const onEmailCheck = async () => {
-    const isEmailValid = await form.trigger("email");
-    if (isEmailValid) {
-      const email = form.getValues("email");
-
-      const success = await handleEmailCheck({ email });
-
-      console.log("success :", success);
     }
   };
 
@@ -92,10 +119,28 @@ const Signup = () => {
               onClick={onEmailCheck}
               className="whitespace-nowrap"
             >
-              Verify
+              Check
             </Button>
           </div>
-          <FormDescription>{description}</FormDescription>
+          {!emailAuthKey && <FormDescription>{description}</FormDescription>}
+          {emailAuthKey && (
+            <div className="flex gap-2 mt-1">
+              <Input
+                name="emailVerify"
+                value={emailVerifyCode}
+                placeholder="Enter the code"
+                onChange={handleInputChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onEmailVerify}
+                className="whitespace-nowrap"
+              >
+                Verify
+              </Button>
+            </div>
+          )}
           <FormMessage />
         </FormItem>
       )}
@@ -138,7 +183,7 @@ const Signup = () => {
 
   return (
     <>
-      {isSigningUp && <Loader />}
+      {(isSigningUp || isEmailChecking) && <Loader />}
 
       <section className="flex w-full h-full">
         {/* Section Left */}

@@ -16,6 +16,6 @@ export const useEmailCheckMutation = () => {
 };
 
 // 이메일 인증 코드 검증 뮤테이션
-export const useVerificationMutation = () => {
+export const useEmailVerifyMutation = () => {
   return useSWRMutation("api/user/register/verifyEmail", verifyEmailCode);
 };

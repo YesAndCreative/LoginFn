@@ -16,6 +16,8 @@ export interface EmailCheckResponse {
   data: {
     authKey: string;
   };
+  message: string;
+  success: boolean;
 }
 
 export interface VerifyCodeRequest {

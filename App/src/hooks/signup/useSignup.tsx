@@ -1,7 +1,7 @@
 import { useSignupMutation } from "@/utils/signup/authSWR";
 import type { SignupData } from "@/types/signup/auth";
 
-export const useSignup = () => {
+const useSignup = () => {
   const {
     trigger: triggerSignup,
     isMutating: isSigningUp,
